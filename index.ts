@@ -11,6 +11,9 @@ database.connect();
 const app: Express = express();
 const port: number | String  = process.env.PORT || 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 mainV1Routes(app);
 
 
