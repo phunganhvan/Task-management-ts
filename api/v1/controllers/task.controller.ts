@@ -64,7 +64,7 @@ export const index = async (req: Request, res: Response) => {
 export const detail = async (req: Request, res: Response) => {
     const id = req.params.id;
     const task = await Task.findById(id);
-    console.log(task);
+    // console.log(task);
     res.json(task);
 }
 //chỉnh sửa 1 công việc
@@ -87,6 +87,104 @@ export const changeStatus = async (req: Request, res: Response) => {
         res.status(400).json({
             code: 400,
             message: "Không tồn tại"
+        });
+    }
+};
+
+
+// [PATCH] /api/v1/tasks/change-multi 
+// chỉnh sửa nhiều công việc
+
+export const changeMulti = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const { ids, key, value } = req.body;
+        console.log(ids, key, value);
+        switch (key) {
+            case "status":
+                await Task.updateMany(
+                    { _id: { $in: ids } },
+                    { status: value }
+                );
+
+                res.json({
+                    code: 200,
+                    message: "Cập nhật trạng thái thành công"
+                });
+                break;
+
+            case "delete":
+                await Task.updateMany(
+                    { _id: { $in: ids } },
+                    { deleted: true }
+                );
+
+                res.json({
+                    code: 200,
+                    message: "Xóa thành công"
+                });
+                break;
+
+            default:
+                res.status(400).json({
+                    code: 400,
+                    message: "Không tồn tại"
+                });
+                break;
+        }
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: "Không tồn tại"
+        });
+    }
+};
+
+// [POST]  /api/v1/tasks/create
+// tạo mới công việc
+// Khai báo type cho req.user (Express không có sẵn)
+
+
+export const create = async (req: Request, res: Response) => {
+    try {
+
+        // Tạo bản ghi
+        const record = new Task(req.body);
+        const data = await record.save();
+
+        res.json({
+            code: 200,
+            message: "Tạo thành công",
+            data: data
+        });
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: "Lỗi!!!"
+        });
+    }
+};
+
+// [PATCH] /api/v1/tasks/edit/:id
+export const edit = async (req: Request, res: Response) => {
+    try {
+        const id: string = req.params.id;
+
+        await Task.updateOne(
+            { _id: id },
+            req.body
+        );
+
+        res.json({
+            code: 200,
+            message: "Cập nhật thành công!"
+        });
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: "Lỗi!!!"
         });
     }
 };
